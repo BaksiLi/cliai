@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import json
+import os
 from getpass import getpass
 from typing import Dict
 
 DEFAULT_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".cligpt")
+
 
 def create_or_update_config(config_dir: str = DEFAULT_CONFIG_DIR) -> None:
     """
@@ -26,7 +27,8 @@ def create_or_update_config(config_dir: str = DEFAULT_CONFIG_DIR) -> None:
             break
 
     # Prompt the user for the organization ID and member name, if desired
-    organization_id = input("Enter your organization ID (optional):\n").strip() or None
+    organization_id = input(
+        "Enter your organization ID (optional):\n").strip() or None
     member_name = input("Enter your member name (optional):\n").strip() or None
     print()
 
@@ -59,7 +61,9 @@ def load_config(config_dir: str = DEFAULT_CONFIG_DIR) -> Dict[str, str]:
         try:
             config = json.load(f)
         except json.JSONDecodeError:
-            print(f"Failed to load config file {config_file}: invalid JSON format.")
+            print(
+                f"Failed to load config file {config_file}: invalid JSON format."
+            )
             return None
 
     return config
