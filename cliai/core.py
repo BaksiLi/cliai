@@ -9,9 +9,9 @@ import openai
 from colorama import Fore
 from colorama import init as colorama_init
 
-from config import create_or_update_config, load_config
-from convo import (MessageList, load_convo, make_request, retry_request,
-                   save_convo, stylize_response)
+from cliai.config import create_or_update_config, load_config
+from cliai.convo import (MessageList, load_convo, make_request, retry_request,
+                         save_convo, stylize_response)
 
 
 def metainitiate():
@@ -23,13 +23,15 @@ def metainitiate():
     pass
 
 
-def initiate():
+def initiate(api_key: Optional[str]):
     """
     Function to initiate the CLI application.
     """
     colorama_init(autoreset=True)
 
-    if api_env := os.getenv('OPENAI_API_KEY'):
+    if api_key:
+        auth(api_key)
+    elif api_env := os.getenv('OPENAI_API_KEY'):
         auth(api_env)
     else:
         config = load_config()

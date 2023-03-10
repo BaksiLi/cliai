@@ -6,7 +6,7 @@ import os
 from getpass import getpass
 from typing import Dict
 
-DEFAULT_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".cligpt")
+DEFAULT_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".cliai")
 
 
 def create_or_update_config(config_dir: str = DEFAULT_CONFIG_DIR) -> None:

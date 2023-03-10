@@ -1,21 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__all__ = ['auth', 'config', 'convo', 'wrapper']
-__version__ = 'dev'
-__license__ = 'MIT'
-__github__ = 'https://github.com/BaksiLi/cligpt'
-
-
 """
-TODO: 
-    - Proxy
+TODO:
+    - Improve using questionary
     - Save Conversations
+    - Improve using rich
+    - Improve using prompt_toolkit
     - Pre-built prompts
+    - Proxy
 """
-
+__version__ = '0.1.2'
+__all__ = ['core', 'config', 'convo', 'cli']
 
 if __name__ == '__main__':
     for module in __all__:
         exec("import {}".format(module))
-    # auth.initiate()
+    cli.cli()
