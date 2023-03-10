@@ -24,18 +24,58 @@ class MessageList(List[Dict[str, str]]):
             raise TypeError("Item must be a dictionary.")
         super().append(item)
 
+    def update_system(self, content: str):
+        """
+        Only the latest system prompt will be effective (experiment result).
+        """
+        # remove all messages with "role": "system"
+        self[:] = [msg for msg in self if msg.get("role") != "system"]
+
+        # append the new
+        self.append({'role': 'system', 'content': content})
+
+
     def user_says(self, content: str):
         super().append({'role': 'user', 'content': f'{content}'})
 
     def assistant_says(self, content: str):
         super().append({'role': 'assistant', 'content': f'{content}'})
 
-    def update_system(self, content: str):
+    def recall_last(self):
+        super().pop()
+
+
+class Conversation(MessageList):
+    """
+    This is similar to class OpenAIObject, but it does more.
+    """
+    def __init__(self):
+        self.model = model
+        self.id = id_
+        self.created = created
+        self.usage = usage
+
+        self.num_choices: int = 1
+        self.temperature: float = 2  # [0,2]
+        # self.nucleus_sampling = top_p
+        # self.pres_penalty = 
+        # self.freq_penalty = 
+        # self.logit_bias: Dict = 
+        # self.max_tokens: int
+        # self.user: Optional[str] = hash(user)
+
+    def __str__(self):
+        # index
+        return 
+
+    def show(self):
+        # only show head and the end of the conversation
         pass
 
-    def export_text(self, path: str):
+
+    def save(self, path: str):
         """
-        Export to a 
+        Export the conversation to a file.
         """
         pass
 

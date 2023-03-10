@@ -60,7 +60,7 @@ def auth(api_key: str) -> None:
     openai.api_key = api_key
 
     if is_authenticated():
-        print(Fore.GREEN + 'Authenticated!')
+        print(Fore.GREEN + '\nAuthenticated!\n')
     else:
         print(Fore.RED + 'Incorrect API key provided!')
 
@@ -78,7 +78,7 @@ def converse(messages: Optional[MessageList] = None,
 
     try:
         # TODO: Add a counter?
-        print('Welcome to chat mode. Type to chat, <Ctrl-C> to quit.\n')
+        print('Welcome to chat mode.\nType to chat, double press <Enter> to send, <Ctrl-C> to quit.\n')
         while True:
             # Ask for user input
             print('User: ')
@@ -90,7 +90,8 @@ def converse(messages: Optional[MessageList] = None,
             messages.user_says(user_says)
 
             response = make_request(messages)
-            if response.choices[0].finish_reason == 'stop':
+            finish_reason = response.choices[0].finish_reason 
+            if finish_reason == 'stop':
                 assistant_says = response.choices[0].message.content
                 if verbose:
                     print(
@@ -98,8 +99,9 @@ def converse(messages: Optional[MessageList] = None,
                     )
                 else:
                     print(f'Assistant:\n\t{stylize_response(assistant_says)}')
-
                 messages.assistant_says(assistant_says)
+            elif finish_reason == 'length':
+                print(Fore.YELLOW + 'Maximum length reached.')
             else:
                 retry_request()
 
