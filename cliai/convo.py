@@ -33,10 +33,11 @@ class MessageList(List[Dict[str, str]]):
     def update_system(self, content: str):
         pass
 
-    def extend(self, items: List[Dict[str, str]]):
-        if not all(isinstance(item, dict) for item in items):
-            raise TypeError("Items must be a list of dictionaries.")
-        super().extend(items)
+    def export_text(self, path: str):
+        """
+        Export to a 
+        """
+        pass
 
 
 def make_request(messages: MessageList) -> OpenAIObject:

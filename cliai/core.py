@@ -23,7 +23,7 @@ def metainitiate():
     pass
 
 
-def initiate(api_key: Optional[str]):
+def initiate(api_key: Optional[str] = None):
     """
     Function to initiate the CLI application.
     """
@@ -44,7 +44,13 @@ def is_authenticated() -> bool:
     """
     Check if the user has authenticated with OpenAI.
     """
-    return openai.api_key is not None
+    if openai.api_key:
+        try:
+            return openai.Model.list() is not None
+        except openai.error.AuthenticationError:
+            return False
+    else:
+        return False
 
 
 def auth(api_key: str) -> None:
@@ -52,10 +58,10 @@ def auth(api_key: str) -> None:
     Authenticate the API key provided by the user.
     """
     openai.api_key = api_key
-    try:
-        openai.Model.list()
+
+    if is_authenticated():
         print(Fore.GREEN + 'Authenticated!')
-    except openai.error.AuthenticationError:
+    else:
         print(Fore.RED + 'Incorrect API key provided!')
 
 
