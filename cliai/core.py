@@ -7,11 +7,12 @@ from typing import Optional
 
 import openai
 import questionary as q
+from prompt_toolkit.lexers import PygmentsLexer
 
 from cliai.config import create_or_update_config, load_config
 from cliai.convo import MessageList, load_convo, make_request, save_convo
-from cliai.util import (print_not_implemented, print_response, print_success,
-                        print_warning, print_role)
+from cliai.util import (InputLexer, print_not_implemented, print_response,
+                        print_role, print_success, print_warning)
 
 
 def metainitiate():
@@ -78,12 +79,16 @@ def converse(messages: Optional[MessageList] = None,
 
     # Ask if to use custom system role
     if not q.confirm('Use the default system role?').ask():
-        print_not_implemented()
+        print()
+        print_role('System')
+        messages.update_system(q.text('', qmark='', lexer=PygmentsLexer(InputLexer)).ask().strip())
+        print()
 
     # Chat while true
     while True:
         # Ask for user input
-        user_says = q.text('', qmark='[User]', multiline=True).ask()
+        print_role('User')
+        user_says = q.text('', qmark='', multiline=True, lexer=PygmentsLexer(InputLexer)).ask()
         messages.user_says(user_says)
         print()
 
@@ -102,14 +107,39 @@ def converse(messages: Optional[MessageList] = None,
                 print_role('Assistant')
                 print_response(assistant_says)
 
-                user_reaction = q.select('Next', choices=['Continue', 'Retry', 'Quit']).ask()
+                user_reaction = q.select('Next', 
+                                         choices=['Continue', 'Modify', 'Retry', 'Quit']
+                                         ).ask()
 
                 if user_reaction == 'Continue':
                     messages.assistant_says(assistant_says)
                     print()
                     break
 
-                # elif user_reaction == 'Modify':
+                elif user_reaction == 'Modify':
+                    modify_choice = q.select('Which of the following do you want to modify?',
+                                             choices = ['User', 'Assistant', 'System']
+                                             ).ask()
+
+                    if modify_choice == 'User':
+                        messages.recall_last()
+                        print()
+                        break
+                    elif modify_choice == 'Assistant':
+                        messages.recall_last()
+                        print()
+                        print_role('Assistant')
+                        assistant_says = q.text('', qmark='', multiline=True, lexer=PygmentsLexer(InputLexer)).ask()
+                        messages.assistant_says(assistant_says)
+                        print()
+                        break
+                    elif modify_choice == 'System':
+                        print_role('System')
+                        messages.update_system(q.text('', qmark='', lexer=PygmentsLexer(InputLexer)).ask().strip())
+                        print()
+
+                elif user_reaction == 'Retry':
+                    pass
 
                 elif user_reaction == 'Quit':
                     print()

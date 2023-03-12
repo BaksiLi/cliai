@@ -21,11 +21,11 @@ STYLE_SHEET = Style([
 
 
 class ResponseLexer(RegexLexer):
-    name = 'ResponseLexer'
     tokens = {
         'root': [
             (r'^As\ an\ AI\ language\ model.*?\.', Generic.Deleted),
-            (r'[ ^]`(.*?)`', Comment.Preproc),
+            (r'[ ^(]`(.*?)`', Comment.Preproc),
+            # TODO: Colour based on language
             (r'^```(.*?$\n)?(.*?\n)+?^```$', Comment.Preproc),
             (r'.+?', Text),
         ]
@@ -33,7 +33,13 @@ class ResponseLexer(RegexLexer):
 
 
 class InputLexer(RegexLexer):
-    pass
+    tokens = {
+        'root': [
+            (r'[ ^(]`(.*?)`', Comment.Preproc),
+            (r'^```(.*?$\n)?(.*?\n)+?^```$', Comment.Preproc),
+            (r'.+?', Text),
+        ]
+    }
 
 
 def print_response(response: str) -> None:

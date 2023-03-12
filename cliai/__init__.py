@@ -7,7 +7,7 @@ TODO:
     - Preset prompts
     - Proxy
 """
-__version__ = '0.2.2'
+__version__ = '0.2.4'
 __all__ = ['core', 'config', 'convo', 'cli', 'util']
 
 if __name__ == '__main__':
