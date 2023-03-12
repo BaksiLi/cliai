@@ -1,10 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python # -*- coding: utf-8 -*-
 
 from typing import Dict, List
 
 import openai
 from colorama import Fore
+from cliai.util import print_not_implemented
 from openai.openai_object import OpenAIObject
 
 
@@ -33,7 +33,6 @@ class MessageList(List[Dict[str, str]]):
 
         # append the new
         self.append({'role': 'system', 'content': content})
-
 
     def user_says(self, content: str):
         super().append({'role': 'user', 'content': f'{content}'})
@@ -72,7 +71,6 @@ class Conversation(MessageList):
         # only show head and the end of the conversation
         pass
 
-
     def save(self, path: str):
         """
         Export the conversation to a file.
@@ -86,19 +84,8 @@ def make_request(messages: MessageList) -> OpenAIObject:
     return response
 
 
-def retry_request():
-    # ['choices'][0]['finish_reason']
-    # response.response_ms
-    pass
-
-
-def stylize_response(response: str):
-    indent = '\t'
-    return response.lstrip().replace('\n', '\n' + indent)
-
-
 def save_convo(messages: MessageList) -> None:
-    print(Fore.RED + 'This function is not available by far!')
+    print_not_implemented()
     pass
 
 

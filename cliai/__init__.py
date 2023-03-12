@@ -3,15 +3,14 @@
 
 """
 TODO:
-    - Improve using questionary
     - Save Conversations
     - Improve using rich
     - Improve using prompt_toolkit
-    - Pre-built prompts
+    - Preset prompts
     - Proxy
 """
-__version__ = '0.1.2'
-__all__ = ['core', 'config', 'convo', 'cli']
+__version__ = '0.2.0'
+__all__ = ['core', 'config', 'convo', 'cli', 'util']
 
 if __name__ == '__main__':
     for module in __all__:
