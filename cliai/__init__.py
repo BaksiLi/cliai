@@ -4,12 +4,10 @@
 """
 TODO:
     - Save Conversations
-    - Improve using rich
-    - Improve using prompt_toolkit
     - Preset prompts
     - Proxy
 """
-__version__ = '0.2.0'
+__version__ = '0.2.2'
 __all__ = ['core', 'config', 'convo', 'cli', 'util']
 
 if __name__ == '__main__':

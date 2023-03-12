@@ -7,12 +7,11 @@ from typing import Optional
 
 import openai
 import questionary as q
-from colorama import Fore
-from colorama import init as colorama_init
 
 from cliai.config import create_or_update_config, load_config
 from cliai.convo import MessageList, load_convo, make_request, save_convo
-from cliai.util import print_not_implemented, stylize_response
+from cliai.util import (print_not_implemented, print_response, print_success,
+                        print_warning, print_role)
 
 
 def metainitiate():
@@ -28,8 +27,6 @@ def initiate(api_key: Optional[str] = None):
     """
     Function to initiate the CLI application.
     """
-    colorama_init(autoreset=True)
-
     if api_key:
         auth(api_key)
     elif api_env := os.getenv('OPENAI_API_KEY'):
@@ -61,9 +58,9 @@ def auth(api_key: str) -> None:
     openai.api_key = api_key
 
     if is_authenticated():
-        print(Fore.GREEN + '\tAuthenticated!\n')
+        print_success('\tAuthenticated!\n')
     else:
-        print(Fore.RED + 'Incorrect API key provided!')
+        print_warning('Incorrect API key provided!')
 
 
 def converse(messages: Optional[MessageList] = None,
@@ -102,10 +99,9 @@ def converse(messages: Optional[MessageList] = None,
                     # TODO: Add a counter?
                     print(f'In {response.response_ms}')
 
-                # Print name (same style as qmark)
-                q.print('[Assistant]', style='fg:#5f819d')
-                # Print response (same style as question)
-                q.print(f'{stylize_response(assistant_says)}', style='bold')
+                print_role('Assistant')
+                print_response(assistant_says)
+
                 user_reaction = q.select('Next', choices=['Continue', 'Retry', 'Quit']).ask()
 
                 if user_reaction == 'Continue':
@@ -113,15 +109,15 @@ def converse(messages: Optional[MessageList] = None,
                     print()
                     break
 
+                # elif user_reaction == 'Modify':
+
                 elif user_reaction == 'Quit':
                     print()
-                    # TODO: a style?
                     if q.confirm('Save this conversation?').ask():
                         save_convo(messages)
                     sys.exit()
 
             elif finish_reason == 'length':
-                q.confirm(Fore.YELLOW + 'Maximum length reached. Retry?').ask()
+                q.confirm('Maximum length reached. Retry?').ask()
 
             print()
-
