@@ -66,4 +66,6 @@ def load_config(config_dir: str = DEFAULT_CONFIG_DIR) -> Dict[str, str]:
             )
             return None
 
+    print()
+
     return config

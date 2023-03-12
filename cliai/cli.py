@@ -13,8 +13,8 @@ def cli():
     pass
 
 
-@cli.command(name='converse', aliases=['chat'])
-@click.option('--api', help='Specify an API')
+@cli.command(name='chat', aliases=['converse'])
+@click.option('--api', help='Specify an API')  # --api-key, and should be for all
 @click.option('--verbose', '-v', is_flag=True, help='Turn on verbose output')
 def converse_command(api, verbose):
     """
@@ -22,6 +22,12 @@ def converse_command(api, verbose):
     """
     initiate(api)
     converse(verbose=verbose)
+
+def interactive():
+    """
+    Enters interactive mode (TUI)
+    """
+    pass
 
 
 # cli.add_command(converse_command)
