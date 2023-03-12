@@ -8,7 +8,8 @@ You can install CliAI via pip:
 pip install cliai
 ```
 
-This program requires Python 3.9. If you are using macOS and do not want to mess up the system python, I recommend you to use tools like pyenv (e.g. `pyenv global 3.9.11`) to switch between versions.
+This program requires Python 3.8.
+If for some reasons you do not want to mess up the old version system python, I recommend you to use tools like pyenv (e.g. `pyenv global 3.8.11`) to switch between versions.
 
 ## Usage
 To start a conversation, simply run:
@@ -18,7 +19,8 @@ cliai chat
 ```
 or alternatively `cliai converse`.
 
-The CLI will guide you to create a configuration. Alternatively, you can specify an API using `export OPENAI_API_KEY="your-key"` or using the `--api` flag.
+The CLI will guide you to create a configuration.
+Alternatively, you can specify an API using `export OPENAI_API_KEY="your-key"` or using the `--api` flag.
 
 ## License
 CliAI is distributed under the MIT license. See [LICENSE](./LICENSE) for more information.
