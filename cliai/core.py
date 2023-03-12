@@ -6,7 +6,7 @@ import sys
 from typing import Optional
 
 import openai
-import questionary
+import questionary as q
 from colorama import Fore
 from colorama import init as colorama_init
 
@@ -80,13 +80,13 @@ def converse(messages: Optional[MessageList] = None,
     print('Welcome to chat mode.\n')
 
     # Ask if to use custom system role
-    if not questionary.confirm('Use the default system role?').ask():
+    if not q.confirm('Use the default system role?').ask():
         print_not_implemented()
 
     # Chat while true
     while True:
         # Ask for user input
-        user_says = questionary.text('', qmark='[User]', multiline=True).ask()
+        user_says = q.text('', qmark='[User]', multiline=True).ask()
         messages.user_says(user_says)
         print()
 
@@ -103,22 +103,25 @@ def converse(messages: Optional[MessageList] = None,
                     print(f'In {response.response_ms}')
 
                 # Print name (same style as qmark)
-                questionary.print('[Assistant]', style='fg:#5f819d')
+                q.print('[Assistant]', style='fg:#5f819d')
                 # Print response (same style as question)
-                questionary.print(f'{stylize_response(assistant_says)}', style='bold')
-                user_reaction = questionary.select('Next', choices=['Continue', 'Retry', 'Quit']).ask()
+                q.print(f'{stylize_response(assistant_says)}', style='bold')
+                user_reaction = q.select('Next', choices=['Continue', 'Retry', 'Quit']).ask()
 
                 if user_reaction == 'Continue':
                     messages.assistant_says(assistant_says)
                     print()
                     break
-                
+
                 elif user_reaction == 'Quit':
-                    if questionary.confirm(Fore.YELLOW + '\nSave this conversation? (y/N): ').ask():
+                    print()
+                    # TODO: a style?
+                    if q.confirm('Save this conversation?').ask():
                         save_convo(messages)
                     sys.exit()
 
             elif finish_reason == 'length':
-                questionary.confirm(Fore.YELLOW + 'Maximum length reached. Retry?').ask()
+                q.confirm(Fore.YELLOW + 'Maximum length reached. Retry?').ask()
 
             print()
+
