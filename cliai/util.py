@@ -23,7 +23,7 @@ STYLE_SHEET = Style([
 class ResponseLexer(RegexLexer):
     tokens = {
         'root': [
-            (r'^As\ an\ AI\ language\ model.*?\.', Generic.Deleted),
+            (r'^As\ an\ AI\ language\ model.*?[\.\!]', Generic.Deleted),
             (r'[ ^(]`(.*?)`', Comment.Preproc),
             # TODO: Colour based on language
             (r'^```(.*?$\n)?(.*?\n)+?^```$', Comment.Preproc),
@@ -43,7 +43,8 @@ class InputLexer(RegexLexer):
 
 
 def print_response(response: str) -> None:
-    tokens = PygmentsTokens(list(lex(response.lstrip(), lexer=ResponseLexer())))
+    tokens = PygmentsTokens(list(lex(response.lstrip(),
+                                     lexer=ResponseLexer())))
     pt_print(tokens, style=STYLE_SHEET)
 
 
