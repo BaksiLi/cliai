@@ -12,6 +12,7 @@ from cliai.config import (auth, create_or_update_config, is_authenticated,
                           load_config)
 from cliai.convo import MessageList, load_convo, make_request, save_convo
 from cliai.util import InputLexer, print_role, print_response
+from cliai.preset import PresetsHandler, Preset
 
 
 def metainitiate():
@@ -53,12 +54,14 @@ def converse(messages: Optional[MessageList] = None,
 
     print('Welcome to chat mode.\n')
 
-    # Ask if to use custom system role
-    if not q.confirm('Use the default system role?').ask():
-        print()
-        print_role('System')
-        messages.update_system(q.text('', qmark='', lexer=PygmentsLexer(InputLexer)).ask().strip())
-        print()
+    # Ask which bot to use
+    presets_handler: PresetsHandler = PresetsHandler()
+    preset:Preset = presets_handler.select_preset()
+
+    print()
+    print_role('System')
+    messages.update_system(preset.role)
+    print()
 
     # Chat while true
     while True:
@@ -70,7 +73,7 @@ def converse(messages: Optional[MessageList] = None,
 
         # Make the resquest while true
         while True:
-            response = make_request(messages)
+            response = make_request(messages, preset)
             finish_reason = response.choices[0].finish_reason
 
             if finish_reason == 'stop':

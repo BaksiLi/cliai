@@ -5,10 +5,10 @@ from typing import Dict, List
 import openai
 from cliai.util import print_not_implemented
 from openai.openai_object import OpenAIObject
+from cliai.preset import Preset
 
 
 class MessageList(List[Dict[str, str]]):
-
     def __init__(self):
         super().__init__()
 
@@ -31,13 +31,13 @@ class MessageList(List[Dict[str, str]]):
         self[:] = [msg for msg in self if msg.get("role") != "system"]
 
         # append the new
-        self.append({'role': 'system', 'content': content})
+        self.append({"role": "system", "content": content})
 
     def user_says(self, content: str):
-        super().append({'role': 'user', 'content': f'{content}'})
+        super().append({"role": "user", "content": f"{content}"})
 
     def assistant_says(self, content: str):
-        super().append({'role': 'assistant', 'content': f'{content}'})
+        super().append({"role": "assistant", "content": f"{content}"})
 
     def recall_last(self):
         super().pop()
@@ -47,6 +47,7 @@ class Conversation(MessageList):
     """
     This is similar to class OpenAIObject, but it does more.
     """
+
     def __init__(self):
         self.model = model
         self.id = id_
@@ -56,15 +57,15 @@ class Conversation(MessageList):
         self.num_choices: int = 1
         self.temperature: float = 2  # [0,2]
         # self.nucleus_sampling = top_p
-        # self.pres_penalty = 
-        # self.freq_penalty = 
-        # self.logit_bias: Dict = 
+        # self.pres_penalty =
+        # self.freq_penalty =
+        # self.logit_bias: Dict =
         # self.max_tokens: int
         # self.user: Optional[str] = hash(user)
 
     def __str__(self):
         # index
-        return 
+        return
 
     def show(self):
         # only show head and the end of the conversation
@@ -77,9 +78,14 @@ class Conversation(MessageList):
         pass
 
 
-def make_request(messages: MessageList) -> OpenAIObject:
-    response = openai.ChatCompletion.create(model='gpt-3.5-turbo',
-                                            messages=messages)
+def make_request(messages: MessageList, preset: Preset) -> OpenAIObject:
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=messages,
+        temperature=preset.temperature,
+        top_p=preset.top_p,
+        max_tokens=preset.maximal_length,
+    )
     return response
 
 

@@ -8,7 +8,7 @@ TODO:
     - Proxy
 """
 __version__ = '0.2.5'
-__all__ = ['core', 'config', 'convo', 'cli', 'util']
+__all__ = ['core', 'config', 'convo', 'cli', 'util', "preset"]
 
 if __name__ == '__main__':
     for module in __all__:
