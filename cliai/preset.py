@@ -59,8 +59,6 @@ class PresetsHandler:
 
         :return: None
         """
-        preset_selection_msg: str = "Please select from presets: \n"
-
         preset_keys: List[str] = list(self.presets.keys())
 
         preset_choices: List[str] = []
@@ -73,9 +71,8 @@ class PresetsHandler:
 
         print(choice)
 
-        #TODO: add default for values so that it can be skipped
         # the logic for entering custom presets
-        if choice is "create a new bot":
+        if choice == "create a new bot":
             config: Dict = {}
 
             role:str = q.text("Please describe the role you want AI to behave", multiline=True).ask()
