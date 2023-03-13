@@ -9,11 +9,12 @@ import questionary as q
 DEFAULT_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".cliai")
 
 
-class Preset(List[Dict]):
+class Preset():
     """
-    The individual Preset we use later, a warpper around List of dictionries 
-
+    The individual Preset we use later, a warpper around the dictionary with specific keywords
+    
     Currently assume it is loaded from json file or created from a Dict, with all proper keys within proper range
+    
     """
 
     def __init__(self, name: str, config: Dict) -> None:
@@ -30,7 +31,9 @@ class Preset(List[Dict]):
 
 class PresetsHandler:
     """
-    The class to handle presets
+    The class to handle presets.
+    
+    TODO: can implement deletion of Presets.
     """
 
     def __init__(self, config_dir: str = DEFAULT_CONFIG_DIR) -> None:
@@ -55,9 +58,9 @@ class PresetsHandler:
 
     def select_preset(self) -> Preset:
         """
-        let the user select a preset using numbers
+        let the user select a preset, also able to set a new preset following the procedure.
 
-        :return: None
+        :return: Preset
         """
         preset_keys: List[str] = list(self.presets.keys())
 
@@ -125,7 +128,7 @@ class PresetsHandler:
             "default": {
                 "role": "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.",
                 "temperature": "1",
-                "maximal_length": "256",
+                "maximal_length": "2048",
                 "top_p": "1",
                 "frequency_panalty": "0",
                 "presents_panalty": "0",
