@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cliai"
-version = "0.2.4"
+version = "0.2.5"
 description = "Command-line interface for OpenAI ChatGPT"
 authors = ["Baksi <myself@baksili.codes>"]
 license = "GPL-3.0-or-later"

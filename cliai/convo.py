@@ -3,7 +3,6 @@
 from typing import Dict, List
 
 import openai
-from colorama import Fore
 from cliai.util import print_not_implemented
 from openai.openai_object import OpenAIObject
 

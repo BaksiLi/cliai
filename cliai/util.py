@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from prompt_toolkit import print_formatted_text as pt_print
-from prompt_toolkit.formatted_text import FormattedText as FText
-from prompt_toolkit.formatted_text import PygmentsTokens
+from prompt_toolkit.formatted_text import PygmentsTokens, FormattedText
 from prompt_toolkit.styles import Style
 from pygments import lex
 from pygments.lexer import RegexLexer
@@ -50,15 +49,15 @@ def print_response(response: str) -> None:
 
 def print_role(role: str) -> None:
     # ROLES = ('system', 'assistant', 'user')
-    pt_print(FText([('class:role', f'[{role}]')]), style=STYLE_SHEET)
+    pt_print(FormattedText([('class:role', f'[{role}]')]), style=STYLE_SHEET)
 
 
 def print_warning(text: str) -> None:
-    pt_print(FText([('class:warning', text)]), style=STYLE_SHEET)
+    pt_print(FormattedText([('class:warning', text)]), style=STYLE_SHEET)
 
 
 def print_success(text: str) -> None:
-    pt_print(FText([('class:success', text)]), style=STYLE_SHEET)
+    pt_print(FormattedText([('class:success', text)]), style=STYLE_SHEET)
 
 
 def print_not_implemented() -> None:

@@ -3,10 +3,46 @@
 
 import json
 import os
-from getpass import getpass
-from typing import Dict
+from typing import Dict, Optional
+
+import openai
+import questionary as q
+
+from cliai.util import print_success, print_warning
 
 DEFAULT_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".cliai")
+
+
+def is_authenticated() -> bool:
+    """
+    Check if the user has authenticated with OpenAI.
+    """
+    if openai.api_key:
+        try:
+            return openai.Model.list() is not None
+        except openai.error.AuthenticationError:
+            return False
+    else:
+        return False
+
+
+def auth(api_key: str, print_success_msg: Optional[bool] = True) -> None:
+    """
+    Authenticate the API key provided by the user.
+    """
+    if not api_key:
+        print_warning('API key cannot be empty!')
+        return False
+
+    openai.api_key = api_key
+
+    if is_authenticated():
+        if print_success_msg:
+            print_success('Authenticated!\n')
+        return True
+    else:
+        print_warning('Incorrect API key provided!')
+        return False
 
 
 def create_or_update_config(config_dir: str = DEFAULT_CONFIG_DIR) -> None:
@@ -17,19 +53,17 @@ def create_or_update_config(config_dir: str = DEFAULT_CONFIG_DIR) -> None:
     os.makedirs(config_dir, exist_ok=True)
     config_file = os.path.join(config_dir, 'openai_config.json')
 
-    # Prompt the user for the API key
     print()
+    # Prompt the user for the API key
     while True:
-        api_key = getpass("Enter your OpenAI API key:\n").strip()
-        if not api_key:
-            print("API key cannot be empty.")
-        else:
+        api_key = q.password('Enter your OpenAI API key:\n').ask()
+        if auth(api_key, print_success_msg=False):
             break
 
+
     # Prompt the user for the organization ID and member name, if desired
-    organization_id = input(
-        "Enter your organization ID (optional):\n").strip() or None
-    member_name = input("Enter your member name (optional):\n").strip() or None
+    organization_id = q.text('Enter your organization ID (optional):\n').ask().strip()
+    member_name = q.text('Enter your member name (optional):\n').ask().strip()
     print()
 
     # Save the configurations to the file
@@ -61,7 +95,7 @@ def load_config(config_dir: str = DEFAULT_CONFIG_DIR) -> Dict[str, str]:
         try:
             config = json.load(f)
         except json.JSONDecodeError:
-            print(
+            print_warning(
                 f"Failed to load config file {config_file}: invalid JSON format."
             )
             return None

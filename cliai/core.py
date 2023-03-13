@@ -5,14 +5,13 @@ import os
 import sys
 from typing import Optional
 
-import openai
 import questionary as q
 from prompt_toolkit.lexers import PygmentsLexer
 
-from cliai.config import create_or_update_config, load_config
+from cliai.config import (auth, create_or_update_config, is_authenticated,
+                          load_config)
 from cliai.convo import MessageList, load_convo, make_request, save_convo
-from cliai.util import (InputLexer, print_not_implemented, print_response,
-                        print_role, print_success, print_warning)
+from cliai.util import InputLexer, print_role, print_response
 
 
 def metainitiate():
@@ -21,47 +20,24 @@ def metainitiate():
     """
     create_or_update_config()
     # generate_builtin_convs()
-    pass
 
 
 def initiate(api_key: Optional[str] = None):
     """
     Function to initiate the CLI application.
     """
+    # API Key given as cli arg
     if api_key:
         auth(api_key)
+    # API Key as shell var
     elif api_env := os.getenv('OPENAI_API_KEY'):
         auth(api_env)
+    # API Key from the config
     else:
         config = load_config()
         auth(config.get('api_key'))
 
     load_convo()
-
-
-def is_authenticated() -> bool:
-    """
-    Check if the user has authenticated with OpenAI.
-    """
-    if openai.api_key:
-        try:
-            return openai.Model.list() is not None
-        except openai.error.AuthenticationError:
-            return False
-    else:
-        return False
-
-
-def auth(api_key: str) -> None:
-    """
-    Authenticate the API key provided by the user.
-    """
-    openai.api_key = api_key
-
-    if is_authenticated():
-        print_success('\tAuthenticated!\n')
-    else:
-        print_warning('Incorrect API key provided!')
 
 
 def converse(messages: Optional[MessageList] = None,
