@@ -5,14 +5,14 @@ import os
 import sys
 from typing import Optional
 
-import openai
-import questionary
-from colorama import Fore
-from colorama import init as colorama_init
+import questionary as q
+from prompt_toolkit.lexers import PygmentsLexer
 
-from cliai.config import create_or_update_config, load_config
+from cliai.config import (auth, create_or_update_config, is_authenticated,
+                          load_config)
 from cliai.convo import MessageList, load_convo, make_request, save_convo
-from cliai.util import print_not_implemented, stylize_response
+from cliai.util import InputLexer, print_role, print_response
+from cliai.preset import PresetsHandler, Preset
 
 
 def metainitiate():
@@ -21,49 +21,24 @@ def metainitiate():
     """
     create_or_update_config()
     # generate_builtin_convs()
-    pass
 
 
 def initiate(api_key: Optional[str] = None):
     """
     Function to initiate the CLI application.
     """
-    colorama_init(autoreset=True)
-
+    # API Key given as cli arg
     if api_key:
         auth(api_key)
+    # API Key as shell var
     elif api_env := os.getenv('OPENAI_API_KEY'):
         auth(api_env)
+    # API Key from the config
     else:
         config = load_config()
         auth(config.get('api_key'))
 
     load_convo()
-
-
-def is_authenticated() -> bool:
-    """
-    Check if the user has authenticated with OpenAI.
-    """
-    if openai.api_key:
-        try:
-            return openai.Model.list() is not None
-        except openai.error.AuthenticationError:
-            return False
-    else:
-        return False
-
-
-def auth(api_key: str) -> None:
-    """
-    Authenticate the API key provided by the user.
-    """
-    openai.api_key = api_key
-
-    if is_authenticated():
-        print(Fore.GREEN + '\tAuthenticated!\n')
-    else:
-        print(Fore.RED + 'Incorrect API key provided!')
 
 
 def converse(messages: Optional[MessageList] = None,
@@ -79,20 +54,26 @@ def converse(messages: Optional[MessageList] = None,
 
     print('Welcome to chat mode.\n')
 
-    # Ask if to use custom system role
-    if not questionary.confirm('Use the default system role?').ask():
-        print_not_implemented()
+    # Ask which bot to use
+    presets_handler: PresetsHandler = PresetsHandler()
+    preset:Preset = presets_handler.select_preset()
+
+    print()
+    print_role('System')
+    messages.update_system(preset.role)
+    print()
 
     # Chat while true
     while True:
         # Ask for user input
-        user_says = questionary.text('', qmark='[User]', multiline=True).ask()
+        print_role('User')
+        user_says = q.text('', qmark='', multiline=True, lexer=PygmentsLexer(InputLexer)).ask()
         messages.user_says(user_says)
         print()
 
         # Make the resquest while true
         while True:
-            response = make_request(messages)
+            response = make_request(messages, preset)
             finish_reason = response.choices[0].finish_reason
 
             if finish_reason == 'stop':
@@ -102,23 +83,50 @@ def converse(messages: Optional[MessageList] = None,
                     # TODO: Add a counter?
                     print(f'In {response.response_ms}')
 
-                # Print name (same style as qmark)
-                questionary.print('[Assistant]', style='fg:#5f819d')
-                # Print response (same style as question)
-                questionary.print(f'{stylize_response(assistant_says)}', style='bold')
-                user_reaction = questionary.select('Next', choices=['Continue', 'Retry', 'Quit']).ask()
+                print_role('Assistant')
+                print_response(assistant_says)
+
+                user_reaction = q.select('Next', 
+                                         choices=['Continue', 'Modify', 'Retry', 'Quit']
+                                         ).ask()
 
                 if user_reaction == 'Continue':
                     messages.assistant_says(assistant_says)
                     print()
                     break
-                
+
+                elif user_reaction == 'Modify':
+                    modify_choice = q.select('Which of the following do you want to modify?',
+                                             choices = ['User', 'Assistant', 'System']
+                                             ).ask()
+
+                    if modify_choice == 'User':
+                        messages.recall_last()
+                        print()
+                        break
+                    elif modify_choice == 'Assistant':
+                        messages.recall_last()
+                        print()
+                        print_role('Assistant')
+                        assistant_says = q.text('', qmark='', multiline=True, lexer=PygmentsLexer(InputLexer)).ask()
+                        messages.assistant_says(assistant_says)
+                        print()
+                        break
+                    elif modify_choice == 'System':
+                        print_role('System')
+                        messages.update_system(q.text('', qmark='', lexer=PygmentsLexer(InputLexer)).ask().strip())
+                        print()
+
+                elif user_reaction == 'Retry':
+                    pass
+
                 elif user_reaction == 'Quit':
-                    if questionary.confirm(Fore.YELLOW + '\nSave this conversation? (y/N): ').ask():
+                    print()
+                    if q.confirm('Save this conversation?').ask():
                         save_convo(messages)
                     sys.exit()
 
             elif finish_reason == 'length':
-                questionary.confirm(Fore.YELLOW + 'Maximum length reached. Retry?').ask()
+                q.confirm('Maximum length reached. Retry?').ask()
 
             print()
