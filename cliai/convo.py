@@ -5,7 +5,6 @@ from typing import Dict, List
 import openai
 from cliai.util import print_not_implemented
 from openai.openai_object import OpenAIObject
-from cliai.preset import Preset
 
 
 class MessageList(List[Dict[str, str]]):
@@ -43,24 +42,52 @@ class MessageList(List[Dict[str, str]]):
         super().pop()
 
 
-class Conversation(MessageList):
+class Presets:
     """
-    This is similar to class OpenAIObject, but it does more.
+    The Pre-settings object.
+
+    It includes the API settings, plus the system_role
     """
+    def __init__(self, system_role):
+        self.system_role: str = system_role
 
-    def __init__(self):
-        self.model = model
-        self.id = id_
-        self.created = created
-        self.usage = usage
+        self.temperature: float = temperature
+        self.top_p: float = top_p
 
-        self.num_choices: int = 1
-        self.temperature: float = 2  # [0,2]
+        self.max_tokens: int = max_tokens
+        self.freq_penalty: float = freq_penalty
+        self.pres_penalty: float = pres_penalty
+
+        # Not sure if other settings work
         # self.nucleus_sampling = top_p
         # self.pres_penalty =
         # self.freq_penalty =
         # self.logit_bias: Dict =
-        # self.max_tokens: int
+
+
+class Conversation():
+    """
+    A conversation includes message history, some presets, and a few metadata.
+
+    It defines what the AI character is.
+    """
+
+    def __init__(self, messages, presets, convo_title: str=None):
+        if convo_name:
+            self.convo_title = convo_title
+        else:
+            convo_title = 'Untitled'
+            # TODO: If messages is not empty, ask model for the title
+
+        # API
+        self.convo_id = convo_id
+        self.model = model
+        self.created = created
+
+        self.num_choices: int = 1
+
+        self.presets = presets
+
         # self.user: Optional[str] = hash(user)
 
     def __str__(self):
@@ -77,14 +104,28 @@ class Conversation(MessageList):
         """
         pass
 
+    def save_presets(self, path: str):
+        pass
 
-def make_request(messages: MessageList, preset: Preset) -> OpenAIObject:
+    def load_presets(self, path:str, overwrite: bool=True):
+        pass
+
+    # TODO
+    def make_request(messages: MessageList, preset: Presets) -> OpenAIObject:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            temperature=preset.temperature,
+            top_p=preset.top_p,
+            max_tokens=preset.max_tokens,
+        )
+        return response
+
+
+def make_request(messages: MessageList) -> OpenAIObject:
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=messages,
-        temperature=preset.temperature,
-        top_p=preset.top_p,
-        max_tokens=preset.maximal_length,
     )
     return response
 

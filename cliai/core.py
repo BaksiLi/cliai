@@ -11,8 +11,7 @@ from prompt_toolkit.lexers import PygmentsLexer
 from cliai.config import (auth, create_or_update_config, is_authenticated,
                           load_config)
 from cliai.convo import MessageList, load_convo, make_request, save_convo
-from cliai.preset import Preset, PresetsHandler
-from cliai.util import InputLexer, print_response, print_role
+from cliai.util import InputLexer, print_response, print_role, print_warning
 
 
 def metainitiate():
@@ -55,8 +54,8 @@ def converse(messages: Optional[MessageList] = None,
     print('Welcome to chat mode.\n')
 
     # Ask which bot to use
-    presets_handler: PresetsHandler = PresetsHandler()
-    preset: Preset = presets_handler.select_preset()
+    # presets_handler: PresetsHandler = PresetsHandler()
+    # preset: Preset = presets_handler.select_preset()
 
     # Ask if to use custom system role
     if not q.confirm('Use the default system role?').ask():
@@ -75,7 +74,8 @@ def converse(messages: Optional[MessageList] = None,
 
         # Make the resquest while true
         while True:
-            response = make_request(messages, preset)
+            # response = make_request(messages, preset)
+            response = make_request(messages)
             finish_reason = response.choices[0].finish_reason
 
             if finish_reason == 'stop':
@@ -131,7 +131,16 @@ def converse(messages: Optional[MessageList] = None,
             elif finish_reason == 'length':
                 q.confirm('Maximum length reached. Retry?').ask()
 
+            elif finish_reason == 'content_filter':
+                print_warning('Content flagged by OpenAI!')
+                q.confirm('Retry?').ask()
+
+            # null
+            else:
+                pass
+
             print()
 
-def manage_config():
+
+def manage_preset():
     pass

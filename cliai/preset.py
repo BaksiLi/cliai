@@ -10,25 +10,26 @@ import questionary as q
 DEFAULT_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".cliai")
 
 
-class Preset():
+class Presets():
     """
-    The individual Preset we use later, a warpper around the dictionary with specific keywords
-    
-    Currently assume it is loaded from json file or created from a Dict, with all proper keys within proper range
-    
-    """
+    The Pre-settings object.
 
+    It includes the API settings, plus the system_role
+    """
     def __init__(self, name: str, config: Dict) -> None:
+        self.name: str = name
 
-        self.name : str = name
+        self.system_role: str = config["system_role"]
 
-        self.system_role : str = config["system_role"]
-        self.temperature : float = float(config["temperature"])
-        self.maximal_length : int = int(config["maximal_length"])
-        self.top_p: float = float(config["top_p"])
-        self.frequency_panalty:float = float(config["frequency_panalty"])
-        self.presence_panalty:float = float(config["presence_panalty"])
+        self.temperature: float = float(config["temperature"])
+        self.top_p: float = float(config["top_p"])  # nucleus_sampling
 
+        self.max_tokens : int = int(config["max_tokens"])
+        self.freq_penalty: float = float(config["frequency_penalty"])
+        self.pres_penalty: float = float(config["presence_penalty"])
+
+
+Preset = Presets
 
 class PresetsHandler:
     """
@@ -119,7 +120,7 @@ class PresetsHandler:
             return preset
             
 
-    def load_from_config(self) -> None:
+    def load_from_config(self, filepath) -> None:
         with open(self.preset_path, "r") as f:
             self.presets = json.load(f)
 
@@ -138,8 +139,3 @@ class PresetsHandler:
         self.presets = default_preset
         with open(self.preset_path, "w+") as f:
             json.dump(self.presets, f)
-
-
-if __name__ == "__main__":
-    presets = PresetsHandler()
-    presets.select_preset()
