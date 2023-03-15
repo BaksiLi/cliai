@@ -45,18 +45,27 @@ class MessageList(List[Dict[str, str]]):
 class Presets:
     """
     The Pre-settings object.
+    It includes the API settings, plus the system_role.
 
-    It includes the API settings, plus the system_role
+    It defines the AI character.
     """
-    def __init__(self, system_role):
-        self.system_role: str = system_role
+    def __init__(self,
+                 model: str = 'gpt-3.5-turbo',
+                 start_up_prompts: MessageList = None,
+                 temperature: float = None,
+                 top_p: float = None,
+                 max_tokens: int = None,
+                 freq_penalty: float = None,
+                 pres_penalty: float = None
+                 ):
+        self.start_up_prompts = start_up_prompts
 
-        self.temperature: float = temperature
-        self.top_p: float = top_p
+        self.temperature = temperature
+        self.top_p = top_p
 
-        self.max_tokens: int = max_tokens
-        self.freq_penalty: float = freq_penalty
-        self.pres_penalty: float = pres_penalty
+        self.max_tokens = max_tokens
+        self.freq_penalty = freq_penalty
+        self.pres_penalty = pres_penalty
 
         # Not sure if other settings work
         # self.nucleus_sampling = top_p
@@ -64,35 +73,46 @@ class Presets:
         # self.freq_penalty =
         # self.logit_bias: Dict =
 
+    def load(self, path: str):
+        pass
 
-class Conversation():
+    def save(self, path: str):
+        pass
+
+
+
+class Conversation:
     """
     A conversation includes message history, some presets, and a few metadata.
-
-    It defines what the AI character is.
     """
 
-    def __init__(self, messages, presets, convo_title: str=None):
+    def __init__(self, 
+                 presets: Presets,
+                 messages: MessageList,
+                 convo_title: str=None,
+                 convo_id: str=None,
+                 num_choices: int = 1
+                 ):
         if convo_name:
             self.convo_title = convo_title
         else:
             convo_title = 'Untitled'
             # TODO: If messages is not empty, ask model for the title
 
-        # API
+        # Metadata
         self.convo_id = convo_id
-        self.model = model
         self.created = created
-
-        self.num_choices: int = 1
-
-        self.presets = presets
-
         # self.user: Optional[str] = hash(user)
 
-    def __str__(self):
-        # index
-        return
+        # Pre-settings
+        self.num_choices: int = 1
+        self.presets = presets
+
+        if presets.start_up_prompts:
+            self.messages = presets.start_up_prompts + messages
+        else:
+            self.messages = messages
+
 
     def show(self):
         # only show head and the end of the conversation
@@ -107,13 +127,13 @@ class Conversation():
     def save_presets(self, path: str):
         pass
 
-    def load_presets(self, path:str, overwrite: bool=True):
+    def load_presets(self, path: str, overwrite: bool=True):
         pass
 
     # TODO
-    def make_request(messages: MessageList, preset: Presets) -> OpenAIObject:
+    def make_request(messages: MessageList, presets: Presets) -> OpenAIObject:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=presets.model,
             messages=messages,
             temperature=preset.temperature,
             top_p=preset.top_p,
