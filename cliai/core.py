@@ -22,20 +22,34 @@ def metainitiate():
     # generate_builtin_convs()
 
 
-def initiate(api_key: Optional[str] = None):
+def initiate(api_key: Optional[str] = None,
+             api_base: Optional[str] = None):
     """
-    Function to initiate the CLI application.
+    Function to initiate OpenAI API settings.
     """
-    # API Key given as cli arg
-    if api_key:
-        auth(api_key)
-    # API Key as shell var
-    elif api_env := os.getenv('OPENAI_API_KEY'):
-        auth(api_env)
-    # API Key from the config
-    else:
+    args = {'api_key': [api_key, 'OPENAI_API_KEY']}
+            # 'api_base': [api_base, 'OPENAI_API_BASE']}
+
+    if not api_key:
         config = load_config()
-        auth(config.get('api_key'))
+
+    auth_args = {}
+    for arg_str in args.keys():
+        arg = args[arg_str][0]
+
+        # API Key given as cli arg
+        if arg:
+            auth_args[arg_str] = arg
+
+        # API Key as shell var (deprecated)
+        # elif arg_env := os.getenv(args[arg_str][1]):
+        #     auth_args[arg_str] = arg_env
+
+        # API Key from the config
+        else:
+            auth_args[arg_str] = config.get(arg_str)
+
+    auth(**auth_args)
 
     load_convo()
 
@@ -141,6 +155,8 @@ def converse(messages: Optional[MessageList] = None,
 
             print()
 
+def manage_config():
+    pass
 
-def manage_preset():
+def manage_convos():
     pass

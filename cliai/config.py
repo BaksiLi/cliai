@@ -26,15 +26,19 @@ def is_authenticated() -> bool:
         return False
 
 
-def auth(api_key: str, print_success_msg: Optional[bool] = True) -> None:
+def auth(api_key: str, api_base: str = None,
+         print_success_msg: Optional[bool] = True) -> None:
     """
     Authenticate the API key provided by the user.
     """
     if not api_key:
         print_warning('API key cannot be empty!')
         return False
-
     openai.api_key = api_key
+
+    if api_base:
+        print(f'Using custom API base: {api_base}.')
+        openai.api_base = api_base
 
     if is_authenticated():
         if print_success_msg:
@@ -53,28 +57,46 @@ def create_or_update_config(config_dir: str = DEFAULT_CONFIG_DIR) -> None:
     os.makedirs(config_dir, exist_ok=True)
     config_file = os.path.join(config_dir, 'openai_config.json')
 
+    # Interaction for configs
     print()
-    # Prompt the user for the API key
     while True:
         api_key = q.password('Enter your OpenAI API key:\n').ask()
-        if auth(api_key, print_success_msg=False):
+        if auth(api_key):
             break
 
+    # Advanced settings
+    advanced = q.checkbox('Choose the settings you wish to use:',
+                          choices=[q.Choice('API Base URL', 'change_url'),
+                                   q.Choice('Organization ID', 'org'),
+                                   q.Choice('Member Name', 'name')]
+                          ).ask()
 
-    # Prompt the user for the organization ID and member name, if desired
-    organization_id = q.text('Enter your organization ID (optional):\n').ask().strip()
-    member_name = q.text('Enter your member name (optional):\n').ask().strip()
+    # Validate inputs for api_base, org_id and member_name
+    if 'change_url' in advanced:
+        api_base = q.text('Enter the base url endpoint: ').ask().strip()
+
+    if 'org' in advanced:
+        org_id = q.text('Enter your organization ID: ').ask().strip()
+
+    if 'name' in advanced:
+        member_name = q.text('Enter your member name: ').ask().strip()
+
     print()
 
     # Save the configurations to the file
     config = {
         "api_key": api_key,
-        "organization_id": organization_id,
-        "member_name": member_name
+        "api_base": api_base if 'change_url' in advanced else None,
+        "organization_id": org_id if 'org' in advanced else None,
+        "member_name": member_name if 'name' in advanced else None,
     }
-    with open(config_file, 'w') as f:
-        json.dump(config, f, indent=4)
-    print(f"Config file saved to {config_file}.")
+
+    try:
+        with open(config_file, 'w') as f:
+            json.dump(config, f, indent=4)
+            print_success(f'Config file saved to {config_file}.')
+    except Exception as e:
+        print_warning(f'Error saving config file to {config_file}. {str(e)}')
 
 
 def load_config(config_dir: str = DEFAULT_CONFIG_DIR) -> Dict[str, str]:
@@ -86,7 +108,7 @@ def load_config(config_dir: str = DEFAULT_CONFIG_DIR) -> Dict[str, str]:
 
     # Check if the file exists
     if not os.path.isfile(config_file):
-        print(f"Config file not found at {config_file}!")
+        print_warning(f'Config file not found at {config_file}!')
         print('Creating...')
         create_or_update_config(config_dir)
 
@@ -96,7 +118,7 @@ def load_config(config_dir: str = DEFAULT_CONFIG_DIR) -> Dict[str, str]:
             config = json.load(f)
         except json.JSONDecodeError:
             print_warning(
-                f"Failed to load config file {config_file}: invalid JSON format."
+                f'Failed to load config file {config_file}: invalid JSON format.'
             )
             return None
 
