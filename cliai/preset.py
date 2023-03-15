@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
-from os.path import isfile, isdir
 import json
-from typing import Dict,  List
+import os
+from os.path import isdir, isfile
+from typing import Dict, List
+
 import questionary as q
 
 DEFAULT_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".cliai")
@@ -19,11 +20,11 @@ class Preset():
 
     def __init__(self, name: str, config: Dict) -> None:
 
-        self.name:str = name
+        self.name : str = name
 
-        self.role:str = config["role"]
-        self.temperature: float = float(config["temperature"])
-        self.maximal_length:int = int(config["maximal_length"])
+        self.system_role : str = config["system_role"]
+        self.temperature : float = float(config["temperature"])
+        self.maximal_length : int = int(config["maximal_length"])
         self.top_p: float = float(config["top_p"])
         self.frequency_panalty:float = float(config["frequency_panalty"])
         self.presence_panalty:float = float(config["presence_panalty"])
@@ -78,8 +79,8 @@ class PresetsHandler:
         if choice == "create a new bot":
             config: Dict = {}
 
-            role:str = q.text("Please describe the role you want AI to behave", multiline=True).ask()
-            config["role"] = role
+            system_role:str = q.text("Please describe the system_role you want AI to behave", multiline=True).ask()
+            config["system_role"] = system_role
 
             temperature:float = float(
                 q.text("Please enter the desired temperature between 0 and 1, default to ", default="1").ask()
@@ -126,7 +127,7 @@ class PresetsHandler:
 
         default_preset: Dict[str, Dict] = {
             "default": {
-                "role": "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.",
+                "system_role": "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.",
                 "temperature": "1",
                 "maximal_length": "2048",
                 "top_p": "1",

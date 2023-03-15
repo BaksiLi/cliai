@@ -4,8 +4,7 @@
 import click
 from click_aliases import ClickAliasedGroup
 
-from cliai.core import converse, initiate
-
+from cliai.core import converse, initiate, manage_config
 
 
 @click.group(cls=ClickAliasedGroup, invoke_without_command=True)
@@ -22,6 +21,10 @@ def converse_command(api, verbose):
     """
     initiate(api)
     converse(verbose=verbose)
+
+@cli.command(name='config')
+def config_command():
+    manage_config()
 
 def interactive():
     """

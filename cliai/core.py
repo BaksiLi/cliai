@@ -11,8 +11,8 @@ from prompt_toolkit.lexers import PygmentsLexer
 from cliai.config import (auth, create_or_update_config, is_authenticated,
                           load_config)
 from cliai.convo import MessageList, load_convo, make_request, save_convo
-from cliai.util import InputLexer, print_role, print_response
-from cliai.preset import PresetsHandler, Preset
+from cliai.preset import Preset, PresetsHandler
+from cliai.util import InputLexer, print_response, print_role
 
 
 def metainitiate():
@@ -56,12 +56,14 @@ def converse(messages: Optional[MessageList] = None,
 
     # Ask which bot to use
     presets_handler: PresetsHandler = PresetsHandler()
-    preset:Preset = presets_handler.select_preset()
+    preset: Preset = presets_handler.select_preset()
 
-    print()
-    print_role('System')
-    messages.update_system(preset.role)
-    print()
+    # Ask if to use custom system role
+    if not q.confirm('Use the default system role?').ask():
+        print()
+        print_role('System')
+        messages.update_system(q.text('', qmark='', lexer=PygmentsLexer(InputLexer)).ask().strip())
+        print()
 
     # Chat while true
     while True:
@@ -130,3 +132,6 @@ def converse(messages: Optional[MessageList] = None,
                 q.confirm('Maximum length reached. Retry?').ask()
 
             print()
+
+def manage_config():
+    pass
