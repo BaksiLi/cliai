@@ -3,6 +3,7 @@
 
 import os
 import sys
+from textwrap import dedent
 from typing import Optional
 
 import questionary as q
@@ -19,8 +20,8 @@ def metainitiate():
     """
     Initiate for the first time.
     """
-    create_or_update_config()
     # generate_builtin_convs()
+    pass
 
 
 def initiate(api_key: Optional[str] = None,
@@ -80,14 +81,18 @@ def converse(messages: Optional[MessageList] = None,
     if not q.confirm('Use the default system role?').ask():
         print()
         print_role('System')
-        messages.update_system(q.text('', qmark='', lexer=PygmentsLexer(InputLexer)).ask().strip())
+        system_prompt = q.text('', qmark='', lexer=PygmentsLexer(InputLexer)).ask()
+        if system_prompt:
+            messages.update_system(system_prompt.strip())
         print()
 
     # Chat while true
     while True:
         # Ask for user input
         print_role('User')
-        user_says = q.text('', qmark='', multiline=True, lexer=PygmentsLexer(InputLexer)).ask()
+        user_says = q.text('', qmark='',
+                           multiline=True,
+                           lexer=PygmentsLexer(InputLexer)).ask()
         messages.user_says(user_says)
         print()
 
@@ -100,9 +105,10 @@ def converse(messages: Optional[MessageList] = None,
             if finish_reason == 'stop':
                 assistant_says = response.choices[0].message.content
 
-                if verbose:
-                    # TODO: Add a counter?
-                    print(f'In {response.response_ms}')
+                print_verbose(dedent(f'''
+                              Message #{messages.__len__()}
+                              Response in {response.response_ms} ms
+                              '''), verbose)
 
                 print_role('Assistant')
                 print_response(assistant_says)

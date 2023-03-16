@@ -3,8 +3,9 @@
 from typing import Dict, List
 
 import openai
-from cliai.util import print_not_implemented
 from openai.openai_object import OpenAIObject
+
+from cliai.util import print_not_implemented
 
 
 class MessageList(List[Dict[str, str]]):
@@ -135,9 +136,9 @@ class Conversation:
         response = openai.ChatCompletion.create(
             model=presets.model,
             messages=messages,
-            temperature=preset.temperature,
-            top_p=preset.top_p,
-            max_tokens=preset.max_tokens,
+            temperature=presets.temperature,
+            top_p=presets.top_p,
+            max_tokens=presets.max_tokens,
         )
         return response
 
