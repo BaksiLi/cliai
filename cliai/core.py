@@ -8,10 +8,11 @@ from typing import Optional
 import questionary as q
 from prompt_toolkit.lexers import PygmentsLexer
 
-from cliai.config import (auth, create_or_update_config, is_authenticated,
-                          load_config)
+from cliai.config import (DEFAULT_CONFIG_DIR, auth, create_or_update_config,
+                          is_authenticated, load_config)
 from cliai.convo import MessageList, load_convo, make_request, save_convo
-from cliai.util import InputLexer, print_response, print_role, print_warning
+from cliai.util import (InputLexer, print_response, print_role, print_verbose,
+                        print_warning)
 
 
 def metainitiate():
@@ -23,49 +24,53 @@ def metainitiate():
 
 
 def initiate(api_key: Optional[str] = None,
-             api_base: Optional[str] = None):
+             api_base: Optional[str] = None,
+             verbose: Optional[bool] = False):
     """
     Function to initiate OpenAI API settings.
     """
-    args = {'api_key': [api_key, 'OPENAI_API_KEY']}
-            # 'api_base': [api_base, 'OPENAI_API_BASE']}
+    args = {'api_key': [api_key, 'OPENAI_API_KEY'],
+            'api_base': [api_base, 'OPENAI_API_BASE']}
 
+    # If no API key is given as arg
+    # this will start the create process
     if not api_key:
         config = load_config()
+        print_verbose(f'Config loaded from {DEFAULT_CONFIG_DIR}.', verbose)
 
     auth_args = {}
     for arg_str in args.keys():
         arg = args[arg_str][0]
 
-        # API Key given as cli arg
+        # Arg given as cli arg
         if arg:
             auth_args[arg_str] = arg
+            if verbose:
+                print_verbose(f'{arg_str} loaded from argument as {arg}.', verbose)
 
-        # API Key as shell var (deprecated)
-        # elif arg_env := os.getenv(args[arg_str][1]):
-        #     auth_args[arg_str] = arg_env
-
-        # API Key from the config
+        # Arg from the config
         else:
             auth_args[arg_str] = config.get(arg_str)
+            if verbose:
+                print_verbose(f'{arg_str} loaded from config file as {arg}.', verbose)
 
-    auth(**auth_args)
+    auth(**auth_args, verbose=verbose)
 
     load_convo()
 
 
 def converse(messages: Optional[MessageList] = None,
-             verbose: Optional[bool] = 0) -> None:
+             verbose: Optional[bool] = False) -> None:
     """
     Start chatting.
     """
     if not is_authenticated():
-        initiate()
+        initiate(verbose=verbose)
 
     if messages is None:
         messages = MessageList()
 
-    print('Welcome to chat mode.\n')
+    print('Welcome to Chat Mode.\n')
 
     # Ask which bot to use
     # presets_handler: PresetsHandler = PresetsHandler()
@@ -132,6 +137,7 @@ def converse(messages: Optional[MessageList] = None,
                         print_role('System')
                         messages.update_system(q.text('', qmark='', lexer=PygmentsLexer(InputLexer)).ask().strip())
                         print()
+                        break
 
                 elif user_reaction == 'Retry':
                     pass

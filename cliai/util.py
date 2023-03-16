@@ -7,6 +7,7 @@ from prompt_toolkit.styles import Style
 from pygments import lex
 from pygments.lexer import RegexLexer
 from pygments.token import Comment, Generic, Text
+from typing import Optional
 
 # TODO: convert (Enum) to be consistent
 STYLE_SHEET = Style([
@@ -59,6 +60,10 @@ def print_warning(text: str) -> None:
 def print_success(text: str) -> None:
     pt_print(FormattedText([('class:success', text)]), style=STYLE_SHEET)
 
+def print_verbose(text: str, verbose: Optional[bool] = False) -> None:
+    if verbose:
+        # pt_print(
+        print(text)
 
 def print_not_implemented() -> None:
     print_warning('This function is not available by far!')

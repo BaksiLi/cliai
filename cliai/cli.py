@@ -30,7 +30,7 @@ def converse_command(api_key, api_base, verbose):
     """
     Start an interactive conversation.
     """
-    initiate(api_key, api_base)
+    initiate(api_key, api_base, verbose)
     converse(verbose=verbose)
 
 

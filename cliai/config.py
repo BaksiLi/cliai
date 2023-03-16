@@ -27,7 +27,8 @@ def is_authenticated() -> bool:
 
 
 def auth(api_key: str, api_base: str = None,
-         print_success_msg: Optional[bool] = True) -> None:
+         print_success_msg: Optional[bool] = True,
+         verbose: Optional[bool] = False) -> None:
     """
     Authenticate the API key provided by the user.
     """
