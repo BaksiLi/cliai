@@ -5,9 +5,9 @@
 TODO:
     - Save Conversations
     - Preset prompts
-    - Proxy
+    - Configuration manager
 """
-__version__ = '0.2.6'
+__version__ = '0.2.7'
 __all__ = ['core', 'config', 'convo', 'cli', 'util', "preset"]
 
 if __name__ == '__main__':

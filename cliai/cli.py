@@ -9,6 +9,22 @@ from click_aliases import ClickAliasedGroup
 
 from cliai.core import converse, initiate, manage_config, manage_convos
 
+LATEST_VERSION_URL = 'https://pypi.org/pypi/cliai/json'
+
+
+def check_version():
+    """Check if CliAI is up-to-date."""
+    import json
+
+    import requests
+    from pkg_resources import get_distribution
+    name = 'cliai'
+
+    current_version = get_distribution(name).version
+    latest_version = json.loads(requests.get(LATEST_VERSION_URL.format(name)).text)["info"]["version"]
+
+    if current_version != latest_version:
+        click.echo("A new version is available. Run 'pip install --upgrade {}' to update.".format(name))
 
 @click.group(cls=ClickAliasedGroup)
 def cli():
@@ -52,7 +68,5 @@ def interactive():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        cli.main(['--help'])
-    else:
-        cli()
+    check_version()
+    cli()

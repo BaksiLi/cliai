@@ -93,10 +93,14 @@ def converse(message: Optional[MessageList] = None,
     if not q.confirm('Use the default system role?').ask():
         print()
         print_role('System')
-        system_prompt = q.text('', qmark='', lexer=PygmentsLexer(InputLexer)).ask()
+        system_prompt = q.text('', 
+                               qmark='',
+                               lexer=PygmentsLexer(InputLexer)).ask()
+
         if system_prompt:
             conversation.update_system(system_prompt.strip())
-        print()
+
+    print()
 
     # Chat while true
     while True:
