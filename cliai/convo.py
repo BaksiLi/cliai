@@ -1,5 +1,6 @@
 #!/usr/bin/env python # -*- coding: utf-8 -*-
 
+from enum import Enum
 from typing import Dict, List
 
 import openai
@@ -8,9 +9,24 @@ from openai.openai_object import OpenAIObject
 from cliai.util import print_not_implemented
 
 
+class ChatCompletionsModel(str, Enum):
+    """
+    https://platform.openai.com/docs/models/model-endpoint-compatibility
+    """
+    ENDPOINT = '/v1/chat/completions'
+    GPT_3_5_turbo = 'gpt-3.5-turbo'
+    GPT_3_5_turbo_0301 = 'gpt-3.5-turbo-0301'
+    GPT_4 = 'gpt-4'
+    GPT_4_0314 = 'gpt-4-0314'
+    GPT_4_32K = 'gpt-4-32k'
+    GPT_4_32K_0314 = 'gpt-4-32k-0314'
+
+
 class MessageList(List[Dict[str, str]]):
     def __init__(self):
         super().__init__()
+        if not self.__len__():
+            self.update_system('You are an assistant who answers every question the user asks')
 
     def __repr__(self):
         return f"MessageList({super().__repr__()})"
@@ -43,15 +59,13 @@ class MessageList(List[Dict[str, str]]):
         super().pop()
 
 
-class Presets:
+class Parameters:
     """
-    The Pre-settings object.
-    It includes the API settings, plus the system_role.
-
-    It defines the AI character.
+    The parameter object for ChatCompletions.
+    It includes parts of the API settings, plus the system_role.
     """
     def __init__(self,
-                 model: str = 'gpt-3.5-turbo',
+                 model: ChatCompletionsModel = ChatCompletionsModel.GPT_3_5_turbo,
                  start_up_prompts: MessageList = None,
                  temperature: float = None,
                  top_p: float = None,
@@ -59,6 +73,7 @@ class Presets:
                  freq_penalty: float = None,
                  pres_penalty: float = None
                  ):
+        self.model = model
         self.start_up_prompts = start_up_prompts
 
         self.temperature = temperature
@@ -69,48 +84,46 @@ class Presets:
         self.pres_penalty = pres_penalty
 
         # Not sure if other settings work
-        # self.nucleus_sampling = top_p
-        # self.pres_penalty =
-        # self.freq_penalty =
         # self.logit_bias: Dict =
 
-    def load(self, path: str):
+    def save(self, path: str):
         pass
 
-    def save(self, path: str):
+    def load(self, path: str):
         pass
 
 
 
 class Conversation:
     """
-    A conversation includes message history, some presets, and a few metadata.
+    A conversation includes message history, partial params, and a few metadata.
+
+    https://platform.openai.com/docs/api-reference/chat/create
     """
 
     def __init__(self, 
-                 presets: Presets,
-                 messages: MessageList,
-                 convo_title: str=None,
-                 convo_id: str=None,
-                 num_choices: int = 1
+                 params: Parameters = Parameters(),
+                 messages: MessageList = MessageList(),
+                 convo_title: str = None,
+                 num_choices: int = 1,
                  ):
-        if convo_name:
+        if convo_title:
             self.convo_title = convo_title
         else:
             convo_title = 'Untitled'
             # TODO: If messages is not empty, ask model for the title
 
-        # Metadata
-        self.convo_id = convo_id
-        self.created = created
+        # Metadata (retrieve from response)
+        # self.convo_id = convo_id
+        # self.created = created
         # self.user: Optional[str] = hash(user)
 
         # Pre-settings
         self.num_choices: int = 1
-        self.presets = presets
+        self.params = params
 
-        if presets.start_up_prompts:
-            self.messages = presets.start_up_prompts + messages
+        if params.start_up_prompts:
+            self.messages = params.start_up_prompts + messages
         else:
             self.messages = messages
 
@@ -125,26 +138,28 @@ class Conversation:
         """
         pass
 
-    def save_presets(self, path: str):
+    def save_params(self, path: str):
         pass
 
-    def load_presets(self, path: str, overwrite: bool=True):
+    def load_params(self, path: str, overwrite: bool=True):
         pass
 
-    # TODO
-    def make_request(messages: MessageList, presets: Presets) -> OpenAIObject:
-        response = openai.ChatCompletion.create(
-            model=presets.model,
-            messages=messages,
-            temperature=presets.temperature,
-            top_p=presets.top_p,
-            max_tokens=presets.max_tokens,
+    def make_request(self, stream: bool = False) -> OpenAIObject:
+        # TODO: check if self.params.xxx
+        response = openai.ChatCompletions.create(
+            model=self.params.model,
+            messages=self.messages,
+            n=self.num_choices,
+            temperature=self.params.temperature,
+            top_p=self.params.top_p,
+            max_tokens=self.params.max_tokens,
+            stream=stream
         )
         return response
 
 
 def make_request(messages: MessageList) -> OpenAIObject:
-    response = openai.ChatCompletion.create(
+    response = openai.ChatCompletions.create(
         model="gpt-3.5-turbo",
         messages=messages,
     )
@@ -157,5 +172,5 @@ def save_convo(messages: MessageList) -> None:
 
 
 def load_convo():
-    # print(Fore.RED + 'This function is not available by far!')
+    # print(fore.red + 'this function is not available by far!')
     pass

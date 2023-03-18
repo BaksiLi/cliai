@@ -106,7 +106,7 @@ def converse(messages: Optional[MessageList] = None,
                 assistant_says = response.choices[0].message.content
 
                 print_verbose(dedent(f'''
-                              Message #{messages.__len__()}
+                              Prompt #{messages.__len__()}
                               Response in {response.response_ms} ms
                               '''), verbose)
 
