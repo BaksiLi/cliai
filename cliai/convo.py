@@ -1,15 +1,16 @@
 #!/usr/bin/env python # -*- coding: utf-8 -*-
 
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import openai
+import questionary as q
 from openai.openai_object import OpenAIObject
 
-from cliai.util import print_not_implemented
+from cliai.util import print_not_implemented, print_warning
 
 
-class ChatCompletionsModel(str, Enum):
+class ChatCompletionModel(str, Enum):
     """
     https://platform.openai.com/docs/models/model-endpoint-compatibility
     """
@@ -61,11 +62,11 @@ class MessageList(List[Dict[str, str]]):
 
 class Parameters:
     """
-    The parameter object for ChatCompletions.
+    The parameter object for ChatCompletion.
     It includes parts of the API settings, plus the system_role.
     """
     def __init__(self,
-                 model: ChatCompletionsModel = ChatCompletionsModel.GPT_3_5_turbo,
+                 model: ChatCompletionModel = ChatCompletionModel.GPT_3_5_turbo,
                  start_up_prompts: MessageList = None,
                  temperature: float = None,
                  top_p: float = None,
@@ -122,10 +123,10 @@ class Conversation:
         self.num_choices: int = 1
         self.params = params
 
+        self.messages = messages
+
         if params.start_up_prompts:
-            self.messages = params.start_up_prompts + messages
-        else:
-            self.messages = messages
+            self.messages.update_system(params.start_up_prompts)
 
 
     def show(self):
@@ -136,7 +137,7 @@ class Conversation:
         """
         Export the conversation to a file.
         """
-        pass
+        print_not_implemented()
 
     def save_params(self, path: str):
         pass
@@ -144,9 +145,23 @@ class Conversation:
     def load_params(self, path: str, overwrite: bool=True):
         pass
 
-    def make_request(self, stream: bool = False) -> OpenAIObject:
-        # TODO: check if self.params.xxx
-        response = openai.ChatCompletions.create(
+    def user_says(self, content: str):
+        self.messages.user_says(content)
+
+    def assistant_says(self, content: str):
+        self.messages.assistant_says(content)
+
+    def update_system(self, content: str):
+        self.messages.update_system(content)
+
+    def make_request(self,
+                     stream: bool = False,
+                     message: Optional[str] = None
+                     ) -> OpenAIObject:
+        if message:
+            self.messages.append(message)
+
+        response = openai.ChatCompletion.create(
             model=self.params.model,
             messages=self.messages,
             n=self.num_choices,
@@ -157,20 +172,34 @@ class Conversation:
         )
         return response
 
+    def receive_stream_response(self):
+        return self.make_request(stream=True)
 
-def make_request(messages: MessageList) -> OpenAIObject:
-    response = openai.ChatCompletions.create(
-        model="gpt-3.5-turbo",
-        messages=messages,
-    )
-    return response
+    def receive_response(self):
+        response = self.make_request(stream=False)
+        finish_reason = response.choices[0].finish_reason
+
+        if finish_reason == 'stop':
+            return response
+
+        elif finish_reason == 'length':
+            if q.confirm('Maximum length reached. Retry?').ask():
+                return cls.receive_response(self)
+
+        elif finish_reason == 'content_filter':
+            print_warning('Content flagged by OpenAI!')
+            if q.confirm('Retry?').ask():
+                return cls.receive_response(self)
+
+        else:  # null
+            pass
+
+        return False
 
 
-def save_convo(messages: MessageList) -> None:
-    print_not_implemented()
-    pass
-
-
-def load_convo():
-    # print(fore.red + 'this function is not available by far!')
-    pass
+# def make_request(messages: MessageList) -> OpenAIObject:
+#     response = openai.ChatCompletion.create(
+#         model="gpt-3.5-turbo",
+#         messages=messages,
+#     )
+#     return response

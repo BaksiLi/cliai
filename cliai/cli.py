@@ -26,12 +26,13 @@ def cli():
               metavar='<OPENAI_API_BASE>',
               help='Use a custom API base')
 @click.option('--verbose', '-v', is_flag=True, help='Turn on verbose output')
-def converse_command(api_key, api_base, verbose):
+@click.option('--stream', is_flag=True, help='Stream output')
+def converse_command(api_key, api_base, stream, verbose):
     """
     Start an interactive conversation.
     """
     initiate(api_key, api_base, verbose)
-    converse(verbose=verbose)
+    converse(verbose=verbose, stream=stream)
 
 
 @cli.command(name='config',
