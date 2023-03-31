@@ -30,6 +30,11 @@ Bypass these restrictions by changing the official API base URL to a custom one 
 cliai chat --api-base <OPENAI_API_BASE>
 ```
 
+### Make it portable
+You can use Linux on your mobile device to install CliAI.
+
+For iOS & iPadOS, use iSH.
+
 ### Prompt Injection
 During chat mode, you can easily modify messages. In addition to changing your own input (`user`), you can tweak the model's response (`assistant`) and system prompt (`system`) to guide the conversation as desired.
 Also you can use [fine-tuning parameters](https://platform.openai.com/docs/api-reference/chat/create) to adjust the model's behaviour.

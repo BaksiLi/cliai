@@ -41,14 +41,18 @@ def cli():
               default=lambda: os.environ.get('OPENAI_API_BASE', ''),
               metavar='<OPENAI_API_BASE>',
               help='Use a custom API base')
+@click.option('--model',
+              default='gpt-3.5-turbo',
+              metavar='<MODEL>',
+              help='Specify a model (e.g. gpt-3.5-turbo, gpt-4-0315')
 @click.option('--verbose', '-v', is_flag=True, help='Turn on verbose output')
 @click.option('--stream', is_flag=True, help='Stream output')
-def converse_command(api_key, api_base, stream, verbose):
+def converse_command(api_key, api_base, model, stream, verbose):
     """
     Start an interactive conversation.
     """
     initiate(api_key, api_base, verbose)
-    converse(verbose=verbose, stream=stream)
+    converse(verbose=verbose, model=model, stream=stream)
 
 
 @cli.command(name='config',
